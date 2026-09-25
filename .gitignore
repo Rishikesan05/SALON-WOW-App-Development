@@ -1,0 +1,156 @@
+# ========================
+# Dependencies
+# ========================
+node_modules/
+.pub-cache/
+.pub/
+.dart_tool/
+
+# ========================
+# Build Outputs
+# ========================
+dist/
+dist-ssr/
+build/
+bin/
+obj/
+out/
+**/android/app/debug/
+**/android/app/profile/
+**/android/app/release/
+app.*.symbols
+app.*.map.json
+
+# ========================
+# Environment & Secrets - NEVER commit these
+# ========================
+.env
+.env.local
+.env.*.local
+*.local
+local.properties
+**/google-services.json
+**/GoogleService-Info.plist
+**/*service-account*.json
+**/*dialogflow-key*.json
+!**/.env.example
+
+# ========================
+# IDEs and Editors
+# ========================
+.idea/
+.vscode/
+*.swp
+*.swo
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.iml
+*.ipr
+*.iws
+
+# ========================
+# OS Generated Files
+# ========================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ========================
+# Logs
+# ========================
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ========================
+# Flutter / Dart
+# ========================
+**/ios/Flutter/.last_build_id
+.flutter-plugins
+.flutter-plugins-dependencies
+**/doc/api/
+/coverage/
+**/devtools_options.yaml
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/Flutter/flutter_lldb_helper.py
+**/ios/Flutter/App.framework
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
+**/ios/Runner/GeneratedPluginRegistrant.h
+**/ios/Runner/GeneratedPluginRegistrant.m
+**/ios/Runner/GeneratedPluginRegistrant.swift
+**/ios/flutter_lldbinit
+**/macos/Flutter/ephemeral/
+**/ios/Flutter/ephemeral/
+**/ephemeral/
+**/macos/Flutter/GeneratedPluginRegistrant.swift
+**/macos/Flutter/flutter_export_environment.sh
+**/macos/Flutter/Flutter-Generated.xcconfig
+**/ios/.flutter-plugins
+**/macos/.flutter-plugins
+**/ios/.flutter-plugins-dependencies
+**/macos/.flutter-plugins-dependencies
+**/generated_plugin_registrant.*
+**/generated_plugins.cmake
+**/GeneratedPluginRegistrant.swift
+
+# ========================
+# NestJS / Node.js Backend
+# ========================
+dist/
+tmp/
+temp/
+*.tsbuildinfo
+
+# ========================
+# Prisma
+# ========================
+prisma/*.db
+prisma/*.db-journal
+
+# ========================
+# Testing
+# ========================
+coverage/
+.nyc_output/
+test-results/
+junit.xml
+
+# ========================
+# AI and Agent Tools
+# ========================
+.gemini/
+.antigravity/
+**/.gemini/
+**/.antigravity/
+*.scratch
+.system_generated/
+
+# ========================
+# Miscellaneous
+# ========================
+*.class
+*.pyc
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# ========================
+# Scratch Files
+# ========================
+**/scratch/
