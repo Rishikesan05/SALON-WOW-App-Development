@@ -1,14 +1,14 @@
-# 💈 Salon WOW: Smart Salon Appointment & Management System
+# ✂️ Salon WOW: Smart Salon Appointment & Management System
 
 [![Flutter](https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white)](https://flutter.dev)
+[![Dart](https://img.shields.io/badge/Dart-0175C2?style=for-the-badge&logo=dart&logoColor=white)](https://dart.dev)
 [![NestJS](https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=nestjs&logoColor=white)](https://nestjs.com/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
-[![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com/)
+[![Prisma](https://img.shields.io/badge/Prisma-2D3748?style=for-the-badge&logo=prisma&logoColor=white)](https://www.prisma.io/)
 [![Gemini AI](https://img.shields.io/badge/Gemini_API-8E75B2?style=for-the-badge&logo=googlegemini&logoColor=white)](https://ai.google.dev/)
 
 **Salon WOW** is a mobile-based smart salon appointment and management system built for **Salon WOW** in Pambahinna, Ratnapura, Sri Lanka. The platform integrates real-time appointment scheduling, role-based salon operations, loyalty rewards, and AI-powered hairstyle recommendations into a single unified mobile application serving both **Customer** and **Admin** experiences.
-
-> *"Unlock your best look"*
 
 ---
 
@@ -24,48 +24,11 @@ SALON-WOW-App-Development/
 └── docs/                # Project documentation and assets
 ```
 
-```mermaid
-graph TD
-    subgraph Mobile ["Mobile Client"]
-        App["Flutter + Dart + Riverpod"]
-    end
-
-    subgraph API ["Network"]
-        REST["HTTPS / REST API / JSON"]
-    end
-
-    subgraph Backend ["Backend — Render"]
-        Server["NestJS + TypeScript + Node.js"]
-        ORM["Prisma ORM"]
-    end
-
-    subgraph Database ["Database — Supabase"]
-        DB[("PostgreSQL")]
-    end
-
-    subgraph Services ["External Services"]
-        FCM["Firebase Cloud Messaging"]
-        Maps["Google Maps Platform"]
-        CDN["Cloudinary"]
-        AI["Gemini API"]
-    end
-
-    App -->|Requests| REST
-    REST --> Server
-    Server --> ORM
-    ORM --> DB
-
-    Server -.-> FCM
-    Server -.-> CDN
-    Server -.-> AI
-    App -.-> Maps
-```
-
 ---
 
 ## ✨ Key Capabilities
 
-### 📱 Mobile Application — Customer
+### 📱 Mobile Application - Customer
 
 - **Authentication:** Registration, login, and OTP verification.
 - **Salon Discovery:** View salon information, services, prices, and active offers.
@@ -77,7 +40,7 @@ graph TD
 - **AI Hair Recommend:** Upload a photo and receive personalized hairstyle suggestions via Gemini API, linked directly to salon services and the booking flow.
 - **Profile & Settings:** Manage personal details, preferences, and notification controls.
 
-### 📱 Mobile Application — Admin
+### 📱 Mobile Application - Admin
 
 - **Dashboard:** Operational overview of daily appointments and salon metrics.
 - **Appointment Lifecycle:** Accept, reject, cancel, complete, and reschedule bookings.
@@ -129,49 +92,66 @@ Customers upload a photo → Gemini API analyzes facial features and hair charac
 
 ---
 
+## 🚀 Getting Started
+
+### Prerequisites
+
+* [Flutter SDK](https://docs.flutter.dev/get-started/install) (3.11+)
+* [Node.js](https://nodejs.org/) (v18 or v20)
+* [PostgreSQL](https://www.postgresql.org/) or a [Supabase](https://supabase.com/) project
+
+---
+
+### 1. Clone & Setup Repository
+
+```bash
+git clone https://github.com/Rishikesan05/SALON-WOW-App-Development.git
+cd SALON-WOW-App-Development
+```
+
+### 2. Run the Mobile App (`mobile/`)
+
+```bash
+cd mobile
+flutter pub get
+flutter run
+```
+
+### 3. Run the Backend (`backend/`)
+
+```bash
+cd backend
+npm install
+npm run start:dev
+```
+
+*The NestJS API server will launch at `http://localhost:3000`.*
+
+### 4. Run Database Migrations
+
+```bash
+npx prisma migrate dev
+npx prisma generate
+```
+
+---
+
+## 🔐 Environment Configuration
+
+Environment secrets and API credentials are kept out of source control:
+
+* **Mobile (`mobile/`)**:
+  * Create `.env` in `mobile/` with `GOOGLE_MAPS_API_KEY` and `GEMINI_API_KEY`.
+* **Backend (`backend/`)**:
+  * Create `.env` in `backend/` containing `DATABASE_URL`, `JWT_SECRET`, `JWT_REFRESH_SECRET`, `CLOUDINARY_*` credentials, and `FCM_SERVER_KEY`.
+
+---
+
 ## 🤝 Branching & Commit Guidelines
 
-- **Branch format:** `feature/<feature-name>`, `fix/<bug-name>`, `chore/<task-name>`
-- **Commit convention:** `[SALON-WOW] YYYY-MM-DD | <Type>: <Description>`
+To ensure academic and professional software development standards:
+
+* **Branch format:** `feature/<feature-name>`, `fix/<bug-name>`, `chore/<task-name>`
+* **Commit convention:** `[SALON-WOW] YYYY-MM-DD | <Type>: <Description>`
 
 *Example:* `[SALON-WOW] 2026-09-25 | Feat: Implement customer appointment booking flow`
-
----
-
-## 🚧 Project Status
-
-🚧 **Development in Progress**
-
-This is an **IS5109 Community Project** at **Sabaragamuwa University of Sri Lanka**.
-
----
-
-## 👥 Development Team
-
-| Student ID | Name |
-| :---: | :--- |
-| 22FIS0584 | S. Rishikesan |
-| 22FIS0520 | M.M.F. Musfira |
-| 22FIS0560 | C. Thinushanth |
-| 22FIS0583 | V. Mathujan |
-| 22FIS0585 | E. Mayoori |
-| 22FIS0470 | R.W.A.D.L. Anuradha |
-
-### Academic Supervisor
-
-**Mr. K.P.D.P. Patabandi**
-Lecturer, Department of Computing and Information Systems
-Faculty of Computing, Sabaragamuwa University of Sri Lanka
-
----
-
-## 📌 Project Information
-
-| | |
-| :--- | :--- |
-| **Module** | IS5109 — Community Project |
-| **Institution** | Sabaragamuwa University of Sri Lanka |
-| **Faculty** | Faculty of Computing |
-| **Department** | Department of Computing and Information Systems |
-| **Client** | Salon WOW |
-| **Location** | Pambahinna, Ratnapura, Sri Lanka |
