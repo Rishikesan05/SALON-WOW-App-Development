@@ -1,0 +1,19 @@
+// ─── Prisma Schema for Salon WOW ───
+// This is the single source of truth for the database structure.
+// Run `npx prisma migrate dev` to apply changes to the database.
+// Run `npx prisma generate` to regenerate the Prisma Client.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Models will be added by team members in Layer 1 (Database Layer) ───
+// Each member will define their assigned models here.
+// After adding models, run:
+//   npx prisma migrate dev --name <migration-name>
+//   npx prisma generate
