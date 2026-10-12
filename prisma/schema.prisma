@@ -163,7 +163,6 @@ model Appointment {
   stylist        Stylist  @relation(fields: [stylist_id], references: [stylist_id])
   date           DateTime @db.Date
   time           DateTime
-  stylist_type   String?  // Requested stylist preference
   status         String   @default("Pending") // "Pending", "Confirmed", "Completed", "Cancelled"
   created_date   DateTime @default(now())
 
