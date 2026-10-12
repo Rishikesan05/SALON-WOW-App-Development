@@ -1,19 +1,194 @@
-// ─── Prisma Schema for Salon WOW ───
-// This is the single source of truth for the database structure.
-// Run `npx prisma migrate dev` to apply changes to the database.
-// Run `npx prisma generate` to regenerate the Prisma Client.
+// ─── Prisma Schema for Salon WOW (Based on Project Proposal) ───
+// Single source of truth for the database structure.
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
-// ─── Models will be added by team members in Layer 1 (Database Layer) ───
-// Each member will define their assigned models here.
-// After adding models, run:
-//   npx prisma migrate dev --name <migration-name>
-//   npx prisma generate
+// ==========================================
+// 👤 MEMBER 1: USER, CUSTOMER & ADMIN
+// ==========================================
+
+enum Role {
+  CUSTOMER
+  ADMIN
+}
+
+model User {
+  user_id       Int       @id @default(autoincrement())
+  name          String
+  email         String    @unique
+  phone         String    @unique
+  password_hash String
+  role          Role      @default(CUSTOMER)
+  created_at    DateTime  @default(now())
+
+  customer Customer?
+  admin    Admin?
+
+  @@map("users")
+}
+
+model Customer {
+  customer_id     Int           @id @default(autoincrement())
+  user_id         Int           @unique
+  user            User          @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  gender          String?       // "Male", "Female", "Other"
+  profile_picture String?
+  
+  loyalty         Loyalty?
+  appointments    Appointment[]
+
+  @@map("customers")
+}
+
+model Admin {
+  admin_id       Int      @id @default(autoincrement())
+  user_id        Int      @unique
+  user           User     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  admin_username String   @unique
+
+  @@map("admins")
+}
+
+// ==========================================
+// 💇 MEMBER 2: SERVICE & SALON SETTINGS
+// ==========================================
+
+model Service {
+  service_id   Int           @id @default(autoincrement())
+  service_name String
+  description  String?
+  price        Decimal       @db.Decimal(10, 2)
+  gender       String        // "Male", "Female", "Unisex"
+  duration     Int           // Duration in minutes
+  status       String        @default("Active") // "Active", "Inactive"
+  image        String?
+  
+  appointments Appointment[]
+
+  @@map("services")
+}
+
+model SalonSettings {
+  setting_id      Int     @id @default(autoincrement())
+  salon_name      String
+  address         String
+  contact_details String
+  location        String? // Google Maps location / Coordinates
+
+  @@map("salon_settings")
+}
+
+// ==========================================
+// ✂️ MEMBER 3: STYLIST & TIME SLOT
+// ==========================================
+
+model Stylist {
+  stylist_id     Int           @id @default(autoincrement())
+  name           String
+  gender         String        // "Male", "Female"
+  specialization String
+  status         String        @default("Active") // "Active", "On Leave"
+
+  time_slots   TimeSlot[]
+  appointments Appointment[]
+
+  @@map("stylists")
+}
+
+model TimeSlot {
+  time_slot_id Int      @id @default(autoincrement())
+  stylist_id   Int
+  stylist      Stylist  @relation(fields: [stylist_id], references: [stylist_id], onDelete: Cascade)
+  date         DateTime @db.Date
+  start_time   DateTime
+  end_time     DateTime
+  status       String   @default("Available") // "Available", "Booked"
+
+  @@map("time_slots")
+}
+
+// ==========================================
+// 🕒 MEMBER 4: SCHEDULE & WORKING HOURS
+// ==========================================
+
+model WorkingHours {
+  working_hours_id Int      @id @default(autoincrement())
+  day              String   // "Monday", "Tuesday", etc.
+  opening_time     DateTime
+  closing_time     DateTime
+  status           String   @default("Open") // "Open", "Closed"
+
+  @@map("working_hours")
+}
+
+model Break {
+  break_id   Int      @id @default(autoincrement())
+  day        String   // "Monday", "Tuesday", etc.
+  start_time DateTime
+  end_time   DateTime
+  reason     String?  // "Lunch Break", "Tea Break"
+  status     String   @default("Active")
+
+  @@map("breaks")
+}
+
+model UnavailableDate {
+  unavailable_date_id Int      @id @default(autoincrement())
+  date                DateTime @db.Date
+  reason              String   // "Poya Day", "Public Holiday", "Renovation"
+  status              String   @default("Closed")
+
+  @@map("unavailable_dates")
+}
+
+// ==========================================
+// 📅 MEMBER 5: APPOINTMENT, OFFER & LOYALTY
+// ==========================================
+
+model Appointment {
+  appointment_id Int      @id @default(autoincrement())
+  customer_id    Int
+  customer       Customer @relation(fields: [customer_id], references: [customer_id], onDelete: Cascade)
+  service_id     Int
+  service        Service  @relation(fields: [service_id], references: [service_id])
+  stylist_id     Int
+  stylist        Stylist  @relation(fields: [stylist_id], references: [stylist_id])
+  date           DateTime @db.Date
+  time           DateTime
+  stylist_type   String?  // Requested stylist preference
+  status         String   @default("Pending") // "Pending", "Confirmed", "Completed", "Cancelled"
+  created_date   DateTime @default(now())
+
+  @@map("appointments")
+}
+
+model Offer {
+  offer_id    Int      @id @default(autoincrement())
+  title       String
+  description String?
+  discount    Decimal  @db.Decimal(5, 2) // e.g. 15.00%
+  start_date  DateTime @db.Date
+  end_date    DateTime @db.Date
+  status      String   @default("Active") // "Active", "Expired"
+
+  @@map("offers")
+}
+
+model Loyalty {
+  loyalty_id          Int      @id @default(autoincrement())
+  customer_id         Int      @unique
+  customer            Customer @relation(fields: [customer_id], references: [customer_id], onDelete: Cascade)
+  points              Int      @default(0)
+  reward_info         String?
+  transaction_history String?
+
+  @@map("loyalty")
+}
