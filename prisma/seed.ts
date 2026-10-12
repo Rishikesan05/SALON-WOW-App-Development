@@ -231,7 +231,6 @@ async function main() {
       stylist_id: stylist1.stylist_id,
       date: new Date('2026-10-15'),
       time: new Date('2026-10-15T10:00:00Z'),
-      stylist_type: 'Requested Kamal Perera',
       status: 'Confirmed',
     },
   });
