@@ -1,4 +1,10 @@
 import { PrismaClient } from '@prisma/client';
+import * as dotenv from 'dotenv';
+import * as path from 'path';
+
+// Load environment variables from .env
+dotenv.config({ path: path.join(process.cwd(), '.env') });
+dotenv.config({ path: path.join(process.cwd(), '../.env') });
 
 const prisma = new PrismaClient();
 
@@ -79,31 +85,31 @@ async function main() {
   // 5. Stylists
   const stylist1 = await prisma.stylist.create({
     data: {
-      name: 'Kamal Perera',
+      name: 'Mathujan',
       gender: 'Male',
-      specialization: 'Master Hair Stylist & Colorist',
+      specialization: 'Master Hair Stylist & Hair Coloring Expert',
       status: 'Active',
     },
   });
 
   const stylist2 = await prisma.stylist.create({
     data: {
-      name: 'Nirosha Silva',
+      name: 'Mayoori',
       gender: 'Female',
-      specialization: 'Skin & Bridal Facial Specialist',
+      specialization: 'Bridal Makeup Artist & Skin Care Specialist',
       status: 'Active',
     },
   });
 
   const stylist3 = await prisma.stylist.create({
     data: {
-      name: 'Dineth Fernando',
+      name: 'Rishikesan',
       gender: 'Male',
-      specialization: 'Barber & Beard Grooming Artist',
+      specialization: 'Senior Barber & Beard Grooming Specialist',
       status: 'Active',
     },
   });
-  console.log('✅ Stylists seeded (3 stylists)');
+  console.log(`✅ Stylists seeded (3 stylists): ${stylist1.name}, ${stylist2.name}, ${stylist3.name}`);
 
   // 6. Services
   const service1 = await prisma.service.create({
@@ -222,6 +228,47 @@ async function main() {
       status: 'Available',
     },
   });
+
+  await prisma.timeSlot.create({
+    data: {
+      stylist_id: stylist2.stylist_id,
+      date: new Date('2026-10-15'),
+      start_time: new Date('2026-10-15T10:00:00Z'),
+      end_time: new Date('2026-10-15T11:00:00Z'),
+      status: 'Available',
+    },
+  });
+
+  await prisma.timeSlot.create({
+    data: {
+      stylist_id: stylist2.stylist_id,
+      date: new Date('2026-10-15'),
+      start_time: new Date('2026-10-15T11:30:00Z'),
+      end_time: new Date('2026-10-15T12:30:00Z'),
+      status: 'Available',
+    },
+  });
+
+  await prisma.timeSlot.create({
+    data: {
+      stylist_id: stylist3.stylist_id,
+      date: new Date('2026-10-15'),
+      start_time: new Date('2026-10-15T14:00:00Z'),
+      end_time: new Date('2026-10-15T14:30:00Z'),
+      status: 'Available',
+    },
+  });
+
+  await prisma.timeSlot.create({
+    data: {
+      stylist_id: stylist3.stylist_id,
+      date: new Date('2026-10-15'),
+      start_time: new Date('2026-10-15T15:00:00Z'),
+      end_time: new Date('2026-10-15T15:30:00Z'),
+      status: 'Available',
+    },
+  });
+  console.log('✅ Time slots seeded for all stylists');
 
   // 12. Sample Appointment
   await prisma.appointment.create({
