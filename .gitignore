@@ -25,6 +25,11 @@ app.*.map.json
 # Environment & Secrets - NEVER commit these
 # ========================
 .env
+.env*
+**/.env
+**/.env*
+*.env
+*.env*
 .env.local
 .env.*.local
 *.local
@@ -33,7 +38,6 @@ local.properties
 **/GoogleService-Info.plist
 **/*service-account*.json
 **/*dialogflow-key*.json
-!**/.env.example
 
 # ========================
 # IDEs and Editors
