@@ -26,18 +26,7 @@ async function main() {
   await prisma.break.deleteMany();
   await prisma.unavailableDate.deleteMany();
 
-  // 2. Salon Settings
-  const salon = await prisma.salonSettings.create({
-    data: {
-      salon_name: 'WOW Salon',
-      address: 'Main Street, Balangoda, Sri Lanka',
-      contact_details: '077-1234567 / info@salonwow.lk',
-      location: 'https://maps.google.com/?q=6.6508,80.7011',
-    },
-  });
-  console.log('✅ Salon Settings seeded');
-
-  // 3. Admin User
+  // 2. Admin User (Moved to top so we can use admin_id)
   const adminUser = await prisma.user.create({
     data: {
       name: 'Pubudu Harshana Amarakoon',
@@ -51,8 +40,24 @@ async function main() {
         },
       },
     },
+    include: {
+      admin: true, // Needed to get the admin_id
+    },
   });
+  const adminId = adminUser.admin!.admin_id; // Extract the admin_id
   console.log('✅ Admin User seeded:', adminUser.name);
+
+  // 3. Salon Settings (Now linked to Admin)
+  await prisma.salonSettings.create({
+    data: {
+      salon_name: 'WOW Salon',
+      address: 'Main Street, Balangoda, Sri Lanka',
+      contact_details: '077-1234567 / info@salonwow.lk',
+      location: 'https://maps.google.com/?q=6.6508,80.7011',
+      admin_id: adminId, // ADDED
+    },
+  });
+  console.log('✅ Salon Settings seeded');
 
   // 4. Customer User
   const customerUser = await prisma.user.create({
@@ -111,7 +116,7 @@ async function main() {
   });
   console.log(`✅ Stylists seeded (3 stylists): ${stylist1.name}, ${stylist2.name}, ${stylist3.name}`);
 
-  // 6. Services
+  // 6. Services (Linked to Admin)
   const service1 = await prisma.service.create({
     data: {
       service_name: 'Classic Haircut & Wash',
@@ -121,6 +126,7 @@ async function main() {
       duration: 30,
       status: 'Active',
       image: 'https://images.unsplash.com/photo-1585747860715-2ba37e788b70',
+      admin_id: adminId,
     },
   });
 
@@ -133,6 +139,7 @@ async function main() {
       duration: 20,
       status: 'Active',
       image: 'https://images.unsplash.com/photo-1621605815971-fbc98d665033',
+      admin_id: adminId,
     },
   });
 
@@ -145,6 +152,7 @@ async function main() {
       duration: 60,
       status: 'Active',
       image: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881',
+      admin_id: adminId,
     },
   });
 
@@ -157,11 +165,12 @@ async function main() {
       duration: 45,
       status: 'Active',
       image: 'https://images.unsplash.com/photo-1560066984-138dadb4c035',
+      admin_id: adminId,
     },
   });
   console.log('✅ Services seeded (4 services)');
 
-  // 7. Offers & Promotions
+  // 7. Offers & Promotions (Linked to Admin)
   await prisma.offer.create({
     data: {
       title: 'WOW Festive 15% OFF',
@@ -170,11 +179,12 @@ async function main() {
       start_date: new Date('2026-10-01'),
       end_date: new Date('2026-10-31'),
       status: 'Active',
+      admin_id: adminId,
     },
   });
   console.log('✅ Offers seeded');
 
-  // 8. Working Hours
+  // 8. Working Hours (Linked to Admin)
   const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   for (const day of days) {
     await prisma.workingHours.create({
@@ -183,12 +193,13 @@ async function main() {
         opening_time: new Date('2026-01-01T09:00:00Z'),
         closing_time: new Date('2026-01-01T20:00:00Z'),
         status: day === 'Sunday' ? 'Short Hours' : 'Open',
+        admin_id: adminId,
       },
     });
   }
   console.log('✅ Working hours seeded (7 days)');
 
-  // 9. Breaks
+  // 9. Breaks (Linked to Admin)
   await prisma.break.create({
     data: {
       day: 'All Days',
@@ -196,19 +207,21 @@ async function main() {
       end_time: new Date('2026-01-01T14:00:00Z'),
       reason: 'Staff Lunch Break',
       status: 'Active',
+      admin_id: adminId,
     },
   });
 
-  // 10. Unavailable Date
+  // 10. Unavailable Date (Linked to Admin)
   await prisma.unavailableDate.create({
     data: {
       date: new Date('2026-10-25'),
       reason: 'Vap Full Moon Poya Day Holiday',
       status: 'Closed',
+      admin_id: adminId,
     },
   });
 
-  // 11. Time Slots
+  // 11. Time Slots (Linked to Admin)
   await prisma.timeSlot.create({
     data: {
       stylist_id: stylist1.stylist_id,
@@ -216,6 +229,7 @@ async function main() {
       start_time: new Date('2026-10-15T10:00:00Z'),
       end_time: new Date('2026-10-15T10:30:00Z'),
       status: 'Booked',
+      admin_id: adminId,
     },
   });
 
@@ -226,6 +240,7 @@ async function main() {
       start_time: new Date('2026-10-15T11:00:00Z'),
       end_time: new Date('2026-10-15T11:30:00Z'),
       status: 'Available',
+      admin_id: adminId,
     },
   });
 
@@ -236,6 +251,7 @@ async function main() {
       start_time: new Date('2026-10-15T10:00:00Z'),
       end_time: new Date('2026-10-15T11:00:00Z'),
       status: 'Available',
+      admin_id: adminId,
     },
   });
 
@@ -246,6 +262,7 @@ async function main() {
       start_time: new Date('2026-10-15T11:30:00Z'),
       end_time: new Date('2026-10-15T12:30:00Z'),
       status: 'Available',
+      admin_id: adminId,
     },
   });
 
@@ -256,6 +273,7 @@ async function main() {
       start_time: new Date('2026-10-15T14:00:00Z'),
       end_time: new Date('2026-10-15T14:30:00Z'),
       status: 'Available',
+      admin_id: adminId,
     },
   });
 
@@ -266,6 +284,7 @@ async function main() {
       start_time: new Date('2026-10-15T15:00:00Z'),
       end_time: new Date('2026-10-15T15:30:00Z'),
       status: 'Available',
+      admin_id: adminId,
     },
   });
   console.log('✅ Time slots seeded for all stylists');
