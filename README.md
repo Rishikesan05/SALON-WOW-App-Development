@@ -155,3 +155,9 @@ To ensure academic and professional software development standards:
 * **Commit convention:** `[SALON-WOW] YYYY-MM-DD | <Type>: <Description>`
 
 *Example:* `[SALON-WOW] 2026-09-25 | Feat: Implement customer appointment booking flow`
+
+---
+
+## 📄 License
+
+This project is licensed under the Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License (CC BY-NC-ND 4.0) - see the [LICENSE](LICENSE) file for details.
