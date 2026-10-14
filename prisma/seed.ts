@@ -7,7 +7,13 @@ import * as path from 'path';
 dotenv.config({ path: path.join(__dirname, '../backend/.env') });
 dotenv.config({ path: path.join(__dirname, '../.env') });
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+  datasources: {
+    db: {
+      url: process.env.DIRECT_URL || process.env.DATABASE_URL,
+    },
+  },
+});
 
 // ─── Relative Date Helpers (Asia/Colombo) ────────────────────────────────────
 const now = new Date();
@@ -165,12 +171,10 @@ async function main() {
     customers.push(user.customer!);
   }
 
-  // 4 Stylists (2 Female, 2 Male)
+  // 2 Stylists: Mr. Pubudu (Male) and Mrs. Pubudu (Female)
   const stylistConfigs = [
-    { name: 'Nadeesha Ranasinghe', email: 'nadeesha@wowsalon.lk', phone: '0761122334', gender: 'Female', spec: 'Haircuts & Styling' },
-    { name: 'Ishara Wickramasinghe', email: 'ishara@wowsalon.lk', phone: '0762233445', gender: 'Female', spec: 'Bridal & Color Specialist' },
-    { name: 'Pubudu Harshana', email: 'pubudu@wowsalon.lk', phone: '0763344556', gender: 'Male', spec: 'Master Barber & Styling' },
-    { name: 'Dinesh Madushanka', email: 'dinesh@wowsalon.lk', phone: '0764455667', gender: 'Male', spec: "Beard Grooming & Men's Cuts" },
+    { name: 'Mrs. Pubudu', email: 'mrs.pubudu@wowsalon.lk', phone: '0762233445', gender: 'Female', spec: 'Senior Hair Stylist & Bridal Specialist' },
+    { name: 'Mr. Pubudu', email: 'pubudu@wowsalon.lk', phone: '0763344556', gender: 'Male', spec: "Master Barber & Men's Grooming Specialist" },
   ];
 
   const stylists: any[] = [];
@@ -196,7 +200,7 @@ async function main() {
     stylists.push(user.stylist!);
   }
 
-  const [nadeesha, ishara, pubuduStylist, dinesh] = stylists;
+  const [mrsPubudu, mrPubudu] = stylists;
 
   // ─── 3. Services ────────────────────────────────────────────────────────────
   console.log('✂️  Seeding Services...');
@@ -237,35 +241,21 @@ async function main() {
 
   // ─── 4. Stylist Services Junction ───────────────────────────────────────────
   console.log('💇 Seeding Stylist-Service Capabilities...');
-  const femaleServices = ["Women's Haircut", 'Hair Coloring', 'Facial', 'Hair Wash & Blow Dry'];
+  const femaleServices = ["Women's Haircut", 'Hair Coloring', 'Facial', 'Bridal Makeup', 'Hair Wash & Blow Dry'];
   const unisexServices = ['Head Massage', 'Hair Treatment'];
-  const maleServices = ["Men's Haircut", 'Hair Wash', 'Hair Styling'];
+  const maleServices = ["Men's Haircut", 'Beard Trim', 'Hair Wash', 'Hair Styling'];
 
-  // Nadeesha: Female + Unisex (except Bridal Makeup)
+  // Mrs. Pubudu: All Female + Unisex services
   for (const name of [...femaleServices, ...unisexServices]) {
     await prisma.stylistService.create({
-      data: { stylist_id: nadeesha.stylist_id, service_id: serviceMap.get(name)!.service_id },
+      data: { stylist_id: mrsPubudu.stylist_id, service_id: serviceMap.get(name)!.service_id },
     });
   }
 
-  // Ishara: Female + Unisex + exclusive Bridal Makeup
-  for (const name of [...femaleServices, ...unisexServices, 'Bridal Makeup']) {
-    await prisma.stylistService.create({
-      data: { stylist_id: ishara.stylist_id, service_id: serviceMap.get(name)!.service_id },
-    });
-  }
-
-  // Pubudu: Male + Unisex (except Beard Trim)
+  // Mr. Pubudu: All Male + Unisex services
   for (const name of [...maleServices, ...unisexServices]) {
     await prisma.stylistService.create({
-      data: { stylist_id: pubuduStylist.stylist_id, service_id: serviceMap.get(name)!.service_id },
-    });
-  }
-
-  // Dinesh: Male + Unisex + exclusive Beard Trim
-  for (const name of [...maleServices, ...unisexServices, 'Beard Trim']) {
-    await prisma.stylistService.create({
-      data: { stylist_id: dinesh.stylist_id, service_id: serviceMap.get(name)!.service_id },
+      data: { stylist_id: mrPubudu.stylist_id, service_id: serviceMap.get(name)!.service_id },
     });
   }
 
@@ -314,7 +304,7 @@ async function main() {
       },
     });
 
-    // Stylist-specific break: Pubudu 16:00 - 16:30 daily
+    // Stylist-specific break: Mr. Pubudu 16:00 - 16:30 daily
     await prisma.break.create({
       data: {
         day,
@@ -323,7 +313,7 @@ async function main() {
         reason: 'Evening Tea Break',
         status: 'Active',
         admin_id: adminId,
-        stylist_id: pubuduStylist.stylist_id,
+        stylist_id: mrPubudu.stylist_id,
       },
     });
   }
@@ -351,14 +341,14 @@ async function main() {
     },
   });
 
-  // Stylist leave day: Nadeesha (+3 days)
+  // Stylist leave day: Mrs. Pubudu (+3 days)
   await prisma.unavailableDate.create({
     data: {
       date: getRelativeDate(3),
       reason: 'Personal Leave',
       status: 'Closed',
       admin_id: adminId,
-      stylist_id: nadeesha.stylist_id,
+      stylist_id: mrsPubudu.stylist_id,
     },
   });
 
@@ -518,10 +508,10 @@ async function main() {
   }
 
   // --- Tomorrow (Day +1) Appointments ---
-  // 7a. Female customer 1 + Nadeesha, 10:00, Women's Haircut + Wash & Blow Dry (75m), CONFIRMED
+  // 7a. Female customer 1 + Mrs. Pubudu, 10:00, Women's Haircut + Wash & Blow Dry (75m), CONFIRMED
   const app7a = await createFullAppointment({
     customer: customers[0], // Dilani
-    stylist: nadeesha,
+    stylist: mrsPubudu,
     date: getRelativeDate(1),
     time: getRelativeDateTime(1, 10, 0),
     services: [serviceMap.get("Women's Haircut")!, serviceMap.get('Hair Wash & Blow Dry')!],
@@ -531,10 +521,10 @@ async function main() {
     customer_notes: 'Please recommend a style suited for a wedding next week.',
   });
 
-  // 7b. Male customer 1 + Pubudu, 10:00 (SAME TIME AS 7a!), Groom Combo (65m), CONFIRMED
+  // 7b. Male customer 1 + Mr. Pubudu, 10:00 (SAME TIME AS 7a!), Groom Combo (65m), CONFIRMED
   const app7b = await createFullAppointment({
     customer: customers[3], // Kasun
-    stylist: pubuduStylist,
+    stylist: mrPubudu,
     date: getRelativeDate(1),
     time: getRelativeDateTime(1, 10, 0),
     services: [serviceMap.get("Men's Haircut")!, serviceMap.get('Hair Wash')!, serviceMap.get('Hair Styling')!],
@@ -545,21 +535,21 @@ async function main() {
     approved_at: now,
   });
 
-  // 7c. Female customer 2 + Ishara, 11:00, Hair Coloring (120m), PENDING
+  // 7c. Female customer 2 + Mrs. Pubudu, 11:30 (after 7a ends at 11:15), Hair Coloring (120m), PENDING
   await createFullAppointment({
     customer: customers[1], // Sanduni
-    stylist: ishara,
+    stylist: mrsPubudu,
     date: getRelativeDate(1),
-    time: getRelativeDateTime(1, 11, 0),
+    time: getRelativeDateTime(1, 11, 30),
     services: [serviceMap.get('Hair Coloring')!],
     status: 'PENDING',
     customer_notes: 'Bringing reference photo for dark caramel ombre.',
   });
 
-  // 7d. Male customer 2 + Dinesh, 15:00, Men's Haircut + Beard Trim (50m), stylist_type 'ANY', PENDING
+  // 7d. Male customer 2 + Mr. Pubudu, 15:00, Men's Haircut + Beard Trim (50m), stylist_type 'ANY', PENDING
   await createFullAppointment({
     customer: customers[4], // Nuwan
-    stylist: dinesh,
+    stylist: mrPubudu,
     date: getRelativeDate(1),
     time: getRelativeDateTime(1, 15, 0),
     services: [serviceMap.get("Men's Haircut")!, serviceMap.get('Beard Trim')!],
@@ -571,7 +561,7 @@ async function main() {
   // 7e. Female customer 3, 2 days from now, Facial, CONFIRMED
   await createFullAppointment({
     customer: customers[2], // Kaveesha
-    stylist: nadeesha,
+    stylist: mrsPubudu,
     date: getRelativeDate(2),
     time: getRelativeDateTime(2, 10, 0),
     services: [serviceMap.get('Facial')!],
@@ -583,7 +573,7 @@ async function main() {
   // 7f. Male customer 3, 3 days from now, Men's Haircut, REJECTED with admin_notes
   await createFullAppointment({
     customer: customers[5], // Tharindu
-    stylist: pubuduStylist,
+    stylist: mrPubudu,
     date: getRelativeDate(3),
     time: getRelativeDateTime(3, 11, 0),
     services: [serviceMap.get("Men's Haircut")!],
@@ -594,7 +584,7 @@ async function main() {
   // 7g. Female customer 1, yesterday (-1 day), Facial (3500 LKR), COMPLETED
   const app7g = await createFullAppointment({
     customer: customers[0], // Dilani
-    stylist: nadeesha,
+    stylist: mrsPubudu,
     date: getRelativeDate(-1),
     time: getRelativeDateTime(-1, 14, 0),
     services: [serviceMap.get('Facial')!],
@@ -604,7 +594,7 @@ async function main() {
   // 7h. Male customer 1, 5 days ago (-5 days), Men's Haircut (1200 LKR), COMPLETED
   const app7h = await createFullAppointment({
     customer: customers[3], // Kasun
-    stylist: pubuduStylist,
+    stylist: mrPubudu,
     date: getRelativeDate(-5),
     time: getRelativeDateTime(-5, 16, 0),
     services: [serviceMap.get("Men's Haircut")!],
@@ -614,7 +604,7 @@ async function main() {
   // 7i. Female customer 2, 4 days ago (-4 days), Hair Treatment, CANCELLED
   await createFullAppointment({
     customer: customers[1], // Sanduni
-    stylist: ishara,
+    stylist: mrsPubudu,
     date: getRelativeDate(-4),
     time: getRelativeDateTime(-4, 11, 0),
     services: [serviceMap.get('Hair Treatment')!],
@@ -626,7 +616,7 @@ async function main() {
   // 7j. Male customer 2, 6 days ago (-6 days), Beard Trim, NO_SHOW
   await createFullAppointment({
     customer: customers[4], // Nuwan
-    stylist: dinesh,
+    stylist: mrPubudu,
     date: getRelativeDate(-6),
     time: getRelativeDateTime(-6, 14, 0),
     services: [serviceMap.get('Beard Trim')!],
@@ -637,7 +627,7 @@ async function main() {
   // 7k. Reschedule pair (Old CANCELLED + New PENDING linked via rescheduled_from_id)
   const oldCancelledApp = await createFullAppointment({
     customer: customers[0], // Dilani
-    stylist: nadeesha,
+    stylist: mrsPubudu,
     date: getRelativeDate(-2),
     time: getRelativeDateTime(-2, 15, 0),
     services: [serviceMap.get('Hair Wash & Blow Dry')!],
@@ -648,7 +638,7 @@ async function main() {
 
   await createFullAppointment({
     customer: customers[0],
-    stylist: nadeesha,
+    stylist: mrsPubudu,
     date: getRelativeDate(1),
     time: getRelativeDateTime(1, 14, 30),
     services: [serviceMap.get('Hair Wash & Blow Dry')!],
@@ -660,7 +650,7 @@ async function main() {
   // Extra: PENDING appointment created 45 mins ago (> 30 min pending hold) to test hold release job
   await createFullAppointment({
     customer: customers[5], // Tharindu
-    stylist: pubuduStylist,
+    stylist: mrPubudu,
     date: getRelativeDate(4),
     time: getRelativeDateTime(4, 14, 0),
     services: [serviceMap.get("Men's Haircut")!],
@@ -738,7 +728,7 @@ async function main() {
         user_id: customers[0].user_id,
         appointment_id: app7a.appointment_id,
         title: 'Booking Confirmed!',
-        message: 'Your appointment for tomorrow at 10:00 AM with Nadeesha has been confirmed.',
+        message: 'Your appointment for tomorrow at 10:00 AM with Mrs. Pubudu has been confirmed.',
         type: 'APPOINTMENT_CONFIRMED',
         is_read: true,
         read_at: now,
@@ -773,7 +763,7 @@ async function main() {
         user_id: customers[3].user_id,
         appointment_id: app7b.appointment_id,
         title: 'Groom Combo Confirmed',
-        message: 'Your Groom Combo appointment tomorrow at 10:00 AM with Pubudu is confirmed.',
+        message: 'Your Groom Combo appointment tomorrow at 10:00 AM with Mr. Pubudu is confirmed.',
         type: 'APPOINTMENT_CONFIRMED',
         is_read: true,
         read_at: now,
@@ -922,14 +912,14 @@ async function main() {
   }
   console.log('✅ Assertion 1 PASSED: Zero overlapping PENDING/CONFIRMED appointments for any stylist.');
 
-  // Assertion 2: Simultaneous booking test (7a Nadeesha & 7b Pubudu share exact start time)
+  // Assertion 2: Simultaneous booking test (7a Mrs. Pubudu & 7b Mr. Pubudu share exact start time)
   if (app7a.time.getTime() !== app7b.time.getTime()) {
     throw new Error('❌ SIMULTANEOUS BOOKING CHECK FAILED: 7a and 7b start times do not match!');
   }
   if (app7a.stylist_id === app7b.stylist_id) {
     throw new Error('❌ SIMULTANEOUS BOOKING CHECK FAILED: 7a and 7b share the same stylist!');
   }
-  console.log('✅ Assertion 2 PASSED: 7a (Nadeesha) and 7b (Pubudu) share exact start time with different stylists.');
+  console.log('✅ Assertion 2 PASSED: 7a (Mrs. Pubudu) and 7b (Mr. Pubudu) share exact start time with different stylists.');
 
   // Assertion 3: Appointment end_time matches start + sum(appointment_services duration)
   const allAppointmentsWithServices = await prisma.appointment.findMany({

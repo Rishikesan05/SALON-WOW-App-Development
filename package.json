@@ -2,8 +2,7 @@
   "name": "SALON-WOW-App-Development",
   "private": true,
   "scripts": {
-    "seed": "tsx prisma/seed.ts",
-    "seed:reset": "tsx prisma/reset-seed.ts"
+    "seed": "tsx prisma/seed.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
