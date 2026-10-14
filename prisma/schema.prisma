@@ -9,30 +9,33 @@ datasource db {
 }
 
 model User {
-  user_id               Int           @id @default(autoincrement())
+  user_id               Int            @id @default(autoincrement())
   name                  String
-  email                 String        @unique
-  phone                 String        @unique
+  email                 String         @unique
+  phone                 String         @unique
   password_hash         String
-  role                  Role          @default(CUSTOMER)
-  created_at            DateTime      @default(now())
-  updated_at            DateTime      @default(now()) @updatedAt
+  role                  Role           @default(CUSTOMER)
+  created_at            DateTime       @default(now())
+  updated_at            DateTime       @default(now()) @updatedAt
   admin                 Admin?
   customer              Customer?
   stylist               Stylist?
-  approved_appointments Appointment[] @relation("ApprovedAppointments")
+  approved_appointments Appointment[]  @relation("ApprovedAppointments")
+  notifications         Notification[]
+  device_tokens         DeviceToken[]
 
   @@map("users")
 }
 
 model Customer {
-  customer_id     Int           @id @default(autoincrement())
-  user_id         Int           @unique
-  gender          String?
-  profile_picture String?
-  appointments    Appointment[]
-  user            User          @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
-  loyalty         Loyalty?
+  customer_id               Int                       @id @default(autoincrement())
+  user_id                   Int                       @unique
+  gender                    String?
+  profile_picture           String?
+  appointments              Appointment[]
+  user                      User                      @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  loyalty                   Loyalty?
+  hairstyle_recommendations HairstyleRecommendation[]
 
   @@map("customers")
 }
@@ -54,17 +57,20 @@ model Admin {
 }
 
 model Service {
-  service_id   Int           @id @default(autoincrement())
-  service_name String
-  description  String?
-  price        Decimal       @db.Decimal(10, 2)
-  gender       String
-  duration     Int
-  status       String        @default("Active")
-  image        String?
-  admin_id     Int
-  admin        Admin         @relation(fields: [admin_id], references: [admin_id])
-  appointments Appointment[]
+  service_id           Int                  @id @default(autoincrement())
+  service_name         String
+  description          String?
+  price                Decimal              @db.Decimal(10, 2)
+  gender               String
+  duration             Int
+  status               String               @default("Active")
+  image                String?
+  admin_id             Int
+  admin                Admin                @relation(fields: [admin_id], references: [admin_id])
+  appointments         Appointment[]
+  appointment_services AppointmentService[]
+  stylist_services     StylistService[]
+  offer_services       OfferService[]
 
   @@map("services")
 }
@@ -99,6 +105,7 @@ model Stylist {
   working_hours     WorkingHours[]
   breaks            Break[]
   unavailable_dates UnavailableDate[]
+  stylist_services  StylistService[]
 
   @@map("stylists")
 }
@@ -160,33 +167,36 @@ model UnavailableDate {
 }
 
 model Appointment {
-  appointment_id      Int           @id @default(autoincrement())
-  customer_id         Int
-  service_id          Int
-  stylist_id          Int
-  date                DateTime      @db.Date
-  time                DateTime
-  end_time            DateTime?
-  total_price         Decimal?      @db.Decimal(10, 2)
-  offer_id            Int?
-  customer_notes      String?
-  admin_notes         String?
-  approved_by_id      Int?
-  approved_at         DateTime?
-  cancelled_at        DateTime?
-  cancellation_reason String?
-  rescheduled_from_id Int?
-  stylist_type        String?
-  status              String        @default("Pending")
-  created_date        DateTime      @default(now())
-  updated_at          DateTime      @default(now()) @updatedAt
-  customer            Customer      @relation(fields: [customer_id], references: [customer_id], onDelete: Cascade)
-  service             Service       @relation(fields: [service_id], references: [service_id])
-  stylist             Stylist       @relation(fields: [stylist_id], references: [stylist_id])
-  offer               Offer?        @relation(fields: [offer_id], references: [offer_id], onDelete: SetNull)
-  approved_by         User?         @relation("ApprovedAppointments", fields: [approved_by_id], references: [user_id], onDelete: SetNull)
-  rescheduled_from    Appointment?  @relation("RescheduledAppointments", fields: [rescheduled_from_id], references: [appointment_id], onDelete: SetNull)
-  rescheduled_to      Appointment[] @relation("RescheduledAppointments")
+  appointment_id       Int                  @id @default(autoincrement())
+  customer_id          Int
+  service_id           Int
+  stylist_id           Int
+  date                 DateTime             @db.Date
+  time                 DateTime
+  end_time             DateTime?
+  total_price          Decimal?             @db.Decimal(10, 2)
+  offer_id             Int?
+  customer_notes       String?
+  admin_notes          String?
+  approved_by_id       Int?
+  approved_at          DateTime?
+  cancelled_at         DateTime?
+  cancellation_reason  String?
+  rescheduled_from_id  Int?
+  stylist_type         String?
+  status               String               @default("Pending")
+  created_date         DateTime             @default(now())
+  updated_at           DateTime             @default(now()) @updatedAt
+  customer             Customer             @relation(fields: [customer_id], references: [customer_id], onDelete: Cascade)
+  service              Service              @relation(fields: [service_id], references: [service_id])
+  stylist              Stylist              @relation(fields: [stylist_id], references: [stylist_id])
+  offer                Offer?               @relation(fields: [offer_id], references: [offer_id], onDelete: SetNull)
+  approved_by          User?                @relation("ApprovedAppointments", fields: [approved_by_id], references: [user_id], onDelete: SetNull)
+  rescheduled_from     Appointment?         @relation("RescheduledAppointments", fields: [rescheduled_from_id], references: [appointment_id], onDelete: SetNull)
+  rescheduled_to       Appointment[]        @relation("RescheduledAppointments")
+  appointment_services AppointmentService[]
+  loyalty_transactions LoyaltyTransaction[]
+  notifications        Notification[]
 
   @@index([stylist_id, time])
   @@index([customer_id, date])
@@ -195,33 +205,124 @@ model Appointment {
 }
 
 model Offer {
-  offer_id      Int           @id @default(autoincrement())
-  title         String
-  description   String?
-  discount      Decimal       @db.Decimal(5, 2)
-  discount_type String        @default("PERCENTAGE")
-  usage_limit   Int?
-  usage_count   Int           @default(0)
-  minimum_spend Decimal?      @db.Decimal(10, 2)
-  start_date    DateTime      @db.Date
-  end_date      DateTime      @db.Date
-  status        String        @default("Active")
-  admin_id      Int
-  admin         Admin         @relation(fields: [admin_id], references: [admin_id])
-  appointments  Appointment[]
+  offer_id       Int            @id @default(autoincrement())
+  title          String
+  description    String?
+  discount       Decimal        @db.Decimal(5, 2)
+  discount_type  String         @default("PERCENTAGE")
+  usage_limit    Int?
+  usage_count    Int            @default(0)
+  minimum_spend  Decimal?       @db.Decimal(10, 2)
+  start_date     DateTime       @db.Date
+  end_date       DateTime       @db.Date
+  status         String         @default("Active")
+  admin_id       Int
+  admin          Admin          @relation(fields: [admin_id], references: [admin_id])
+  appointments   Appointment[]
+  offer_services OfferService[]
 
   @@map("offers")
 }
 
 model Loyalty {
-  loyalty_id          Int      @id @default(autoincrement())
-  customer_id         Int      @unique
-  points              Int      @default(0)
+  loyalty_id          Int                  @id @default(autoincrement())
+  customer_id         Int                  @unique
+  points              Int                  @default(0)
   reward_info         String?
   transaction_history String?
-  customer            Customer @relation(fields: [customer_id], references: [customer_id], onDelete: Cascade)
+  customer            Customer             @relation(fields: [customer_id], references: [customer_id], onDelete: Cascade)
+  transactions        LoyaltyTransaction[]
 
   @@map("loyalty")
+}
+
+model AppointmentService {
+  appointment_service_id Int         @id @default(autoincrement())
+  appointment_id         Int
+  service_id             Int
+  service_name           String
+  duration_mins          Int
+  unit_price             Decimal     @db.Decimal(10, 2)
+  appointment            Appointment @relation(fields: [appointment_id], references: [appointment_id], onDelete: Cascade)
+  service                Service     @relation(fields: [service_id], references: [service_id])
+
+  @@map("appointment_services")
+}
+
+model StylistService {
+  stylist_id Int
+  service_id Int
+  stylist    Stylist @relation(fields: [stylist_id], references: [stylist_id], onDelete: Cascade)
+  service    Service @relation(fields: [service_id], references: [service_id], onDelete: Cascade)
+
+  @@id([stylist_id, service_id])
+  @@map("stylist_services")
+}
+
+model OfferService {
+  offer_id   Int
+  service_id Int
+  offer      Offer   @relation(fields: [offer_id], references: [offer_id], onDelete: Cascade)
+  service    Service @relation(fields: [service_id], references: [service_id], onDelete: Cascade)
+
+  @@id([offer_id, service_id])
+  @@map("offer_services")
+}
+
+model LoyaltyTransaction {
+  transaction_id Int          @id @default(autoincrement())
+  loyalty_id     Int
+  appointment_id Int?
+  points         Int
+  type           String
+  description    String?
+  created_at     DateTime     @default(now())
+  loyalty        Loyalty      @relation(fields: [loyalty_id], references: [loyalty_id], onDelete: Cascade)
+  appointment    Appointment? @relation(fields: [appointment_id], references: [appointment_id], onDelete: SetNull)
+
+  @@unique([appointment_id, type])
+  @@map("loyalty_transactions")
+}
+
+model Notification {
+  notification_id Int          @id @default(autoincrement())
+  user_id         Int
+  appointment_id  Int?
+  title           String
+  message         String
+  type            String
+  is_read         Boolean      @default(false)
+  created_at      DateTime     @default(now())
+  read_at         DateTime?
+  user            User         @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  appointment     Appointment? @relation(fields: [appointment_id], references: [appointment_id], onDelete: SetNull)
+
+  @@index([user_id, is_read, created_at])
+  @@map("notifications")
+}
+
+model HairstyleRecommendation {
+  recommendation_id   Int      @id @default(autoincrement())
+  customer_id         Int
+  recommendation_data Json
+  image_path          String?
+  created_at          DateTime @default(now())
+  expires_at          DateTime
+  customer            Customer @relation(fields: [customer_id], references: [customer_id], onDelete: Cascade)
+
+  @@index([expires_at])
+  @@map("hairstyle_recommendations")
+}
+
+model DeviceToken {
+  token_id   Int      @id @default(autoincrement())
+  user_id    Int
+  token      String   @unique
+  platform   String
+  created_at DateTime @default(now())
+  user       User     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
+  @@map("device_tokens")
 }
 
 enum Role {
