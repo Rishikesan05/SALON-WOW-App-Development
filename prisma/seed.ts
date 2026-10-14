@@ -171,18 +171,47 @@ async function main() {
   console.log('✅ Services seeded (4 services)');
 
   // 7. Offers & Promotions (Linked to Admin)
-  await prisma.offer.create({
-    data: {
-      title: 'WOW Festive 15% OFF',
-      description: 'Enjoy 15% off on all Premium Hair Spa and Facial treatments',
-      discount: 15.0,
-      start_date: new Date('2026-10-01'),
-      end_date: new Date('2026-10-31'),
-      status: 'Active',
-      admin_id: adminId,
-    },
+  await prisma.offer.createMany({
+    data: [
+      {
+        title: 'WOW Festive 15% OFF',
+        description: 'Enjoy 15% off on all Premium Hair Spa and Facial treatments',
+        discount: 15.0,
+        start_date: new Date('2026-10-01'),
+        end_date: new Date('2026-10-31'),
+        status: 'Active',
+        admin_id: adminId,
+      },
+      {
+        title: 'New Customer Welcome 20% OFF',
+        description: 'Exclusive 20% discount on your first appointment booking across all salon services',
+        discount: 20.0,
+        start_date: new Date('2026-10-01'),
+        end_date: new Date('2026-12-31'),
+        status: 'Active',
+        admin_id: adminId,
+      },
+      {
+        title: 'Bridal Glam Season 25% OFF',
+        description: 'Special 25% discount on Bridal Radiance Glow Facial and bridal makeup packages',
+        discount: 25.0,
+        start_date: new Date('2026-10-15'),
+        end_date: new Date('2026-11-30'),
+        status: 'Active',
+        admin_id: adminId,
+      },
+      {
+        title: 'Midweek Grooming Special 10% OFF',
+        description: 'Enjoy 10% discount on Haircuts and Beard Grooming on Tuesday through Thursday',
+        discount: 10.0,
+        start_date: new Date('2026-10-01'),
+        end_date: new Date('2026-11-15'),
+        status: 'Active',
+        admin_id: adminId,
+      },
+    ],
   });
-  console.log('✅ Offers seeded');
+  console.log('✅ Offers seeded (4 offers)');
 
   // 8. Working Hours (Linked to Admin)
   const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
