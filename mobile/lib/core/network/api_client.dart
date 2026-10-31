@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import '../constants/api_constants.dart';
 
 /// Shared HTTP client for all API calls.
@@ -25,7 +26,7 @@ class ApiClient {
       LogInterceptor(
         requestBody: true,
         responseBody: true,
-        logPrint: (log) => print('[API] $log'),
+        logPrint: (log) => debugPrint('[API] $log'),
       ),
     );
 
